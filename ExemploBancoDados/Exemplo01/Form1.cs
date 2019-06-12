@@ -41,13 +41,44 @@ namespace Exemplo01
             comando.ExecuteNonQuery();
             MessageBox.Show("Registro criado com sucesso");
             LimparCampos();
+            conexao.Close();
         }
+
         private void LimparCampos()
         {
             txtModelo.Clear();
             nudAno.Value = DateTime.Now.Year;
             cbCor.SelectedIndex = -1;
             mtbPreco.Clear();
+        }
+
+        private void AtualizarTabela()
+        {
+            SqlConnection conexao = new SqlConnection();
+            conexao.ConnectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=T:\Documentos\Henrique.mdf;Integrated Security=True;Connect Timeout=30";
+            conexao.Open();
+
+            SqlCommand comando = new SqlCommand();
+            comando.Connection = conexao;
+            comando.CommandText = "SELECT id,modelo FROM carros";
+
+            DataTable tabela = new DataTable();
+            tabela.Load(comando.ExecuteReader());
+
+            dataGridView1.RowCount = 0;
+            for(int i = 0;i < tabela.Rows.Count;i++)
+            {
+                DataRow linha = tabela.Rows[i];
+                Carro carro = new Carro();
+                carro.Id = Convert.ToInt32(linha["id"]);
+                carro.Modelo = linha["modelo"].ToString();
+                dataGridView1.Rows.Add(new string[] { carro.Id.ToString(), carro.Modelo });
+            }
+        }
+
+        private void Form1_Activated(object sender, EventArgs e)
+        {
+            AtualizarTabela();
         }
     }
 }
